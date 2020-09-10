@@ -112,33 +112,33 @@
                                    "android.webkit.resource.AUDIO_CAPTURE" :record-audio})
 
 (views/defview request-resources-panel [resources url]
-               [react/view styles/blocked-access-container
-                [react/view styles/blocked-access-icon-container
-                 [icons/icon :main-icons/camera styles/blocked-access-camera-icon]]
-                [react/view styles/blocked-access-text-container
-                 [react/text {:style styles/blocked-access-text}
-                  (str url " " (i18n/label :t/page-would-like-to-use-camera))]]
+  [react/view styles/blocked-access-container
+   [react/view styles/blocked-access-icon-container
+    [icons/icon :main-icons/camera styles/blocked-access-camera-icon]]
+   [react/view styles/blocked-access-text-container
+    [react/text {:style styles/blocked-access-text}
+     (str url " " (i18n/label :t/page-would-like-to-use-camera))]]
 
-                [react/view styles/blocked-access-buttons-container
-                 [react/view styles/blocked-access-button-wrapper
-                  [quo/button
-                   {:theme    :positive
-                    :style    styles/blocked-access-button
-                    :on-press (fn []
-                                (components.permissions/request-permissions
-                                 {:permissions (map #(get resources-to-permissions-map %) resources)
-                                  :on-allowed  #(.answerPermissionRequest ^js @webview-ref/webview-ref true resources)
-                                  :on-denied  #(.answerPermissionRequest ^js @webview-ref/webview-ref false)})
-                                (re-frame/dispatch [:bottom-sheet/hide]))}
-                   (i18n/label :t/allow)]]
-                 [react/view styles/blocked-access-button-wrapper
-                  [quo/button
-                   {:theme    :negative
-                    :style    styles/blocked-access-button
-                    :on-press (fn []
-                                (.answerPermissionRequest ^js @webview-ref/webview-ref false)
-                                (re-frame/dispatch [:bottom-sheet/hide]))}
-                   (i18n/label :t/deny)]]]])
+   [react/view styles/blocked-access-buttons-container
+    [react/view styles/blocked-access-button-wrapper
+     [quo/button
+      {:theme    :positive
+       :style    styles/blocked-access-button
+       :on-press (fn []
+                   (components.permissions/request-permissions
+                    {:permissions (map #(get resources-to-permissions-map %) resources)
+                     :on-allowed  #(.answerPermissionRequest ^js @webview-ref/webview-ref true resources)
+                     :on-denied  #(.answerPermissionRequest ^js @webview-ref/webview-ref false)})
+                   (re-frame/dispatch [:bottom-sheet/hide]))}
+      (i18n/label :t/allow)]]
+    [react/view styles/blocked-access-button-wrapper
+     [quo/button
+      {:theme    :negative
+       :style    styles/blocked-access-button
+       :on-press (fn []
+                   (.answerPermissionRequest ^js @webview-ref/webview-ref false)
+                   (re-frame/dispatch [:bottom-sheet/hide]))}
+      (i18n/label :t/deny)]]]])
 
 (views/defview block-resources-panel [url]
   [react/view styles/blocked-access-container
@@ -149,7 +149,7 @@
      (str url " " (i18n/label :t/page-camera-request-blocked))]]])
 
 (defn request-resources-access-for-page [resources url]
-  (re-frame/dispatch 
+  (re-frame/dispatch
    [:bottom-sheet/show-sheet
     {:content        (fn [] [request-resources-panel resources url])
      :show-handle?       false
@@ -160,7 +160,7 @@
 (defn block-resources-access-and-notify-user [url]
   (.answerPermissionRequest ^js @webview-ref/webview-ref false)
   (re-frame/dispatch [:bottom-sheet/show-sheet
-                      {:content (fn [] [block-resources-panel url] )}]))
+                      {:content (fn [] [block-resources-panel url])}]))
 
 ;; should-component-update is called only when component's props are changed,
 ;; that's why it can't be used in `browser`, because `url` comes from subs
@@ -187,14 +187,14 @@
         :local-storage-enabled                      true
         :render-error                               web-view-error
         :on-navigation-state-change                 #(do
-                                                        (re-frame/dispatch [:set-in [:ens/registration :state] :searching])
-                                                        (debounce/debounce-and-dispatch
-                                                         [:browser/navigation-state-changed % error?]
-                                                         500))
-        
+                                                       (re-frame/dispatch [:set-in [:ens/registration :state] :searching])
+                                                       (debounce/debounce-and-dispatch
+                                                        [:browser/navigation-state-changed % error?]
+                                                        500))
+
         :on-permission-request                      #(if resources-permission?
-                                                      (request-resources-access-for-page (-> ^js % .-nativeEvent .-resources) url)
-                                                      (block-resources-access-and-notify-user url))
+                                                       (request-resources-access-for-page (-> ^js % .-nativeEvent .-resources) url)
+                                                       (block-resources-access-and-notify-user url))
         ;; Extract event data here due to
         ;; https://reactjs.org/docs/events.html#event-pooling
         :on-message                                 #(re-frame/dispatch [:browser/bridge-message-received (.. ^js % -nativeEvent -data)])
@@ -216,8 +216,7 @@
                   {:keys [url error? loading? url-editing? show-tooltip show-permission resolving?]} [:browser/options]
                   dapps-account [:dapps-account]
                   network-id [:chain-id]
-                  {:keys [webview-allow-permission-requests?]} [:multiaccount]
-                  ]
+                  {:keys [webview-allow-permission-requests?]} [:multiaccount]]
     (let [can-go-back?    (browser/can-go-back? browser)
           can-go-forward? (browser/can-go-forward? browser)
           url-original    (browser/get-current-url browser)]
