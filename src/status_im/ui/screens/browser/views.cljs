@@ -1,7 +1,6 @@
 (ns status-im.ui.screens.browser.views
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
-            [clojure.string :as string]
             [status-im.browser.core :as browser]
             [status-im.browser.webview-ref :as webview-ref]
             [status-im.i18n :as i18n]
@@ -22,9 +21,7 @@
             [status-im.utils.http :as http]
             [status-im.utils.js-resources :as js-res]
             [status-im.utils.contenthash :as contenthash]
-            [status-im.utils.utils :as utils]
             [status-im.ui.components.permissions :as components.permissions]
-            [status-im.ui.components.bottom-panel.views :as bottom-panel]
             [quo.core :as quo])
   (:require-macros [status-im.utils.views :as views]))
 
@@ -118,7 +115,6 @@
    [react/view styles/blocked-access-text-container
     [react/text {:style styles/blocked-access-text}
      (str url " " (i18n/label :t/page-would-like-to-use-camera))]]
-
    [react/view styles/blocked-access-buttons-container
     [react/view styles/blocked-access-button-wrapper
      [quo/button
@@ -225,20 +221,20 @@
        [react/view
         (when loading?
           [connectivity/loading-indicator window-width])]
-       [browser-component {:dapp?           dapp?
-                           :error?          error?
-                           :url             url
-                           :url-original    url-original
-                           :browser         browser
-                           :browser-id      browser-id
-                           :unsafe?         unsafe?
-                           :ignore-unsafe   ignore-unsafe
-                           :can-go-back?    can-go-back?
-                           :can-go-forward? can-go-forward?
-                           :resolving?      resolving?
-                           :network-id      network-id
-                           :show-permission show-permission
-                           :show-tooltip    show-tooltip
-                           :name            name
-                           :dapps-account   dapps-account
+       [browser-component {:dapp?                 dapp?
+                           :error?                error?
+                           :url                   url
+                           :url-original          url-original
+                           :browser               browser
+                           :browser-id            browser-id
+                           :unsafe?               unsafe?
+                           :ignore-unsafe         ignore-unsafe
+                           :can-go-back?          can-go-back?
+                           :can-go-forward?       can-go-forward?
+                           :resolving?            resolving?
+                           :network-id            network-id
+                           :show-permission       show-permission
+                           :show-tooltip          show-tooltip
+                           :name                  name
+                           :dapps-account         dapps-account
                            :resources-permission? webview-allow-permission-requests?}]])))
