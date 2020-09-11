@@ -2,7 +2,6 @@
   (:require [re-frame.core :as re-frame]
             [status-im.contact.db :as contact.db]
             [status-im.ethereum.core :as ethereum]
-            [status-im.ethereum.eip55 :as eip55]
             [status-im.ethereum.eip681 :as eip681]
             [status-im.ethereum.ens :as ens]
             [status-im.i18n :as i18n]
@@ -11,9 +10,7 @@
             [status-im.router.core :as router]
             [status-im.qr-scanner.core :as qr-scaner]
             [status-im.ui.components.bottom-sheet.core :as bottom-sheet]
-            [status-im.navigation :as navigation]
-            [clojure.string :as string]
-            [status-im.ethereum.stateofus :as stateofus]))
+            [status-im.navigation :as navigation]))
 
 ;; FIXME(Ferossgp): Should be part of QR scanner not wallet
 (fx/defn toggle-flashlight

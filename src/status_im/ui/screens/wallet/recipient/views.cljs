@@ -13,7 +13,6 @@
             [status-im.ui.components.icons.vector-icons :as icons]
             [status-im.ui.components.chat-icon.screen :as chat-icon]
             [status-im.multiaccounts.core :as multiaccounts]
-            [status-im.ui.components.chat-icon.screen :as chat-icon.screen]
             [status-im.utils.utils :as utils]
             [status-im.ui.components.keyboard-avoid-presentation :as kb-presentation]
             [status-im.ui.components.toolbar :as toolbar]
@@ -53,7 +52,7 @@
                          (re-frame/dispatch [:set-in [:contacts/new-identity :state] :searching])
                          (debounce/debounce-and-dispatch [:new-chat/set-new-identity text] 300))}]]))
 
-(defn section [title cnt content]
+(defn section [_ _ _]
   (let [opened? (reagent/atom false)]
     (fn [title cnt content]
       [react/view {:padding-vertical 8}
@@ -61,15 +60,15 @@
         {:title    title
          :on-press #(swap! opened? not)
          :accessory
-                   [react/view {:flex-direction :row :align-items :center}
-                    (when (> cnt 0)
-                      [react/text {:style {:color colors/gray}} cnt])
-                    [icons/icon (if @opened? :main-icons/dropdown :main-icons/next)
-                     {:container-style {:align-items     :center
-                                        :margin-left     8
-                                        :justify-content :center}
-                      :resize-mode     :center
-                      :color           colors/black}]]}]
+         [react/view {:flex-direction :row :align-items :center}
+          (when (> cnt 0)
+            [react/text {:style {:color colors/gray}} cnt])
+          [icons/icon (if @opened? :main-icons/dropdown :main-icons/next)
+           {:container-style {:align-items     :center
+                              :margin-left     8
+                              :justify-content :center}
+            :resize-mode     :center
+            :color           colors/black}]]}]
        (when @opened?
          content)])))
 
@@ -92,7 +91,7 @@
       :on-press #(do
                    (some-> ^js @scroll-view-ref (.scrollTo #js {:x 0 :animated true}))
                    (re-frame/dispatch [:wallet.recipient/address-changed name]))
-      :icon     [chat-icon.screen/contact-icon-contacts-tab
+      :icon     [chat-icon/contact-icon-contacts-tab
                  (multiaccounts/displayed-photo contact)]}]))
 
 (defn empty-items [icon title]
