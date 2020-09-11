@@ -27,7 +27,8 @@
             [status-im.wallet.prices :as prices]
             [status-im.wallet.utils :as wallet.utils]
             [status-im.native-module.core :as status]
-            [status-im.ui.screens.mobile-network-settings.utils :as mobile-network-utils]))
+            [status-im.ui.screens.mobile-network-settings.utils :as mobile-network-utils]
+            status-im.wallet.recipient.core))
 
 (defn get-balance
   [{:keys [address on-success on-error]}]
@@ -195,6 +196,13 @@
      {:db (assoc db :wallet/all-tokens all-tokens)}
      (when config/erc20-contract-warnings-enabled?
        {:wallet/validate-tokens default-tokens}))))
+
+(fx/defn initialize-favourites
+  [{:keys [db]} favourites]
+  {:db (assoc db :wallet/favourites (reduce (fn [acc {:keys [address] :as favourit}]
+                                              (assoc acc address favourit))
+                                            {}
+                                            favourites))})
 
 (fx/defn update-balances
   [{{:keys [network-status :wallet/all-tokens
@@ -583,9 +591,11 @@
   {:events [:wallet.send/navigate-to-recipient-code]}
   [{:keys [db] :as cofx}]
   (fx/merge cofx
-            {:db (assoc-in db [:wallet/prepare-transaction :modal-opened?] true)}
+            {:db (-> db
+                     (assoc-in [:wallet/prepare-transaction :modal-opened?] true)
+                     (assoc :wallet/recipient {}))}
             (bottom-sheet/hide-bottom-sheet)
-            (navigation/navigate-to-cofx :contact-code nil)))
+            (navigation/navigate-to-cofx :recipient nil)))
 
 (fx/defn show-delete-account-confirmation
   {:events [:wallet.settings/show-delete-account-confirmation]}

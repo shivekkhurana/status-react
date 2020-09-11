@@ -30,10 +30,13 @@
   (assoc-in fx [:db :wallet :send-transaction :gas]
             ethereum/default-transaction-gas))
 
-(re-frame/reg-fx
- ::resolve-address
- (fn [{:keys [registry ens-name cb]}]
-   (ens/get-addr registry ens-name cb)))
+(fx/defn set-recipient
+  {:events [:wallet.send/set-recipient]}
+  [{:keys [db]} address]
+  {:db       (-> db
+                 (assoc-in [:wallet/prepare-transaction :to] address)
+                 (assoc-in [:wallet/prepare-transaction :modal-opened?] false))
+   :dispatch [:navigate-back]})
 
 (re-frame/reg-fx
  ::resolve-addresses
@@ -49,29 +52,6 @@
        (.then callback)
        (.catch (fn [error]
                  (js/console.log error))))))
-
-(fx/defn set-recipient
-  {:events [:wallet.send/set-recipient ::recipient-address-resolved]}
-  [{:keys [db]} raw-recipient]
-  (let [chain (ethereum/chain-keyword db)
-        recipient (when raw-recipient (string/trim raw-recipient))]
-    (cond
-      (ethereum/address? recipient)
-      (let [checksum (eip55/address->checksum recipient)]
-        (if (eip55/valid-address-checksum? checksum)
-          {:db       (-> db
-                         (assoc-in [:wallet/prepare-transaction :to] checksum)
-                         (assoc-in [:wallet/prepare-transaction :modal-opened?] false))
-           :dispatch [:navigate-back]}
-          {:ui/show-error (i18n/label :t/wallet-invalid-address-checksum {:data recipient})}))
-      (not (string/blank? recipient))
-      {::resolve-address {:registry (get ens/ens-registries chain)
-                          :ens-name (if (= (.indexOf ^js recipient ".") -1)
-                                      (stateofus/subdomain recipient)
-                                      recipient)
-                          :cb       #(re-frame/dispatch [::recipient-address-resolved %])}}
-      :else
-      {:ui/show-error (i18n/label :t/wallet-invalid-address {:data recipient})})))
 
 (defn- fill-prepare-transaction-details
   [db
@@ -101,14 +81,17 @@
   (let [{:keys [address] :as details}
         (eip681/extract-request-details data all-tokens)]
     (if address
-      (if (:wallet/prepare-transaction db)
-        {:db (update db :wallet/prepare-transaction assoc
-                     :to address :to-name (find-address-name db address))}
-        (let [current-chain-id (get-in networks [current-network :config :NetworkId])]
-          (merge {:db (fill-prepare-transaction-details db details all-tokens)}
-                 (when (and chain-id (not= current-chain-id chain-id))
-                   {:ui/show-error (i18n/label :t/wallet-invalid-chain-id
-                                               {:data uri :chain current-chain-id})}))))
+      (if (:wallet/recipient db)
+        {:db (update db :wallet/recipient assoc :resolved-address address
+                     :address address)}
+        (if (:wallet/prepare-transaction db)
+          {:db (update db :wallet/prepare-transaction assoc
+                       :to address :to-name (find-address-name db address))}
+          (let [current-chain-id (get-in networks [current-network :config :NetworkId])]
+            (merge {:db (fill-prepare-transaction-details db details all-tokens)}
+                   (when (and chain-id (not= current-chain-id chain-id))
+                     {:ui/show-error (i18n/label :t/wallet-invalid-chain-id
+                                                 {:data uri :chain current-chain-id})})))))
       {:ui/show-error (i18n/label :t/wallet-invalid-address {:data uri})})))
 
 (fx/defn qr-scanner-allowed
@@ -156,5 +139,6 @@
             (navigation/navigate-back)
             (parse-eip681-uri-and-resolve-ens (router/match-eip681 data))
             (fn [{:keys [db]}]
-              (when (get-in db [:wallet/prepare-transaction :modal-opened?])
+              (when (and (get-in db [:wallet/prepare-transaction :modal-opened?])
+                         (not (:wallet/recipient db)))
                 {:db (assoc-in db [:wallet/prepare-transaction :modal-opened?] false)}))))

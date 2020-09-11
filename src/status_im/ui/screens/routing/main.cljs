@@ -2,7 +2,7 @@
   (:require-macros [status-im.utils.views :as views])
   (:require [status-im.ui.screens.profile.tribute-to-talk.views :as tr-to-talk]
             [status-im.ui.screens.add-new.new-public-chat.view :as new-public-chat]
-            [status-im.ui.screens.wallet.components.views :as wallet.components]
+            [status-im.ui.screens.wallet.recipient.views :as recipient]
             [status-im.ui.screens.qr-scanner.views :as qr-scanner]
             [status-im.ui.screens.stickers.views :as stickers]
             [status-im.ui.screens.home.views :as home]
@@ -103,8 +103,14 @@
         :transition :presentation-ios
         :insets     {:bottom true}
         :component  group-chat/add-participants-toggle-list}
-       {:name      :contact-code
-        :component wallet.components/contact-code}
+       {:name       :recipient
+        :transition :presentation-ios
+        :insets     {:bottom true}
+        :component  recipient/recipient}
+       {:name       :new-favourite
+        :transition :presentation-ios
+        :insets     {:bottom true}
+        :component  recipient/new-favourite}
        {:name      :qr-scanner
         :insets    {:top false :bottom false}
         :component qr-scanner/qr-scanner}

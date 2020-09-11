@@ -82,9 +82,7 @@
       :accessibility-label :choose-recipient-button
       :on-press            #(do
                               (re-frame/dispatch [:dismiss-keyboard])
-                              (re-frame/dispatch [:bottom-sheet/show-sheet
-                                                  {:content        sheets/choose-recipient
-                                                   :content-height 200}]))
+                              (re-frame/dispatch [:wallet.send/navigate-to-recipient-code]))
       :chevron             true}]))
 
 (defn set-max [token]
